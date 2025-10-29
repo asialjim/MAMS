@@ -83,7 +83,6 @@
         <module>app</module>
         <module>user</module>
         <module>wx</module>
-        <module>tiktok</module>
     </modules>
 
     <properties>
