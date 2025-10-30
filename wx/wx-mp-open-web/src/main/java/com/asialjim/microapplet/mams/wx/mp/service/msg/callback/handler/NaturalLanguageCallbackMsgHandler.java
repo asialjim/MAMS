@@ -22,9 +22,9 @@ import com.asialjim.microapplet.wechat.official.service.msg.WeChatOfficialMsgCal
 import com.asialjim.microapplet.wechat.official.service.msg.reply.WxMpXmlOutMessage;
 import com.asialjim.microapplet.wechat.official.remoting.ai.WeChatAIVoiceRemoting;
 import com.asialjim.microapplet.wechat.official.remoting.ai.meta.WeChatQueryRecoResultForTextRes;
-import com.asialjim.microapplet.wechat.official.remoting.customer.WeChatPaCustomerMessageRemoting;
-import com.asialjim.microapplet.wechat.official.remoting.customer.meta.WeChatCustomerTextMessage;
-import com.asialjim.microapplet.wechat.official.remoting.customer.meta.item.Text;
+import com.asialjim.microapplet.wechat.remoting.message.customer.WeChatCustomerMessageRemoting;
+import com.asialjim.microapplet.wechat.remoting.message.customer.meta.WeChatCustomerTextMessage;
+import com.asialjim.microapplet.wechat.remoting.message.customer.meta.item.Text;
 import com.asialjim.microapplet.wechat.remoting.context.BaseWeChatApiRes;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +54,7 @@ public class NaturalLanguageCallbackMsgHandler implements CallbackMsgHandler {
 //    private ChatClient.Builder chatClientBuilder;
 
     @Resource
-    private WeChatPaCustomerMessageRemoting weChatPaCustomerMessageRemoting;
+    private WeChatCustomerMessageRemoting weChatCustomerMessageRemoting;
 
     @Override
     public boolean support(String msgType) {
@@ -88,7 +88,7 @@ public class NaturalLanguageCallbackMsgHandler implements CallbackMsgHandler {
                 WeChatCustomerTextMessage msg = new WeChatCustomerTextMessage();
                 msg.setTouser(event.getOpenid());
                 msg.setText(Text.builder().content("Are you OK?").build());
-                BaseWeChatApiRes apiRes = weChatPaCustomerMessageRemoting.sendCustomerMsg(event.getAppid(), msg);
+                BaseWeChatApiRes apiRes = weChatCustomerMessageRemoting.sendCustomerMsg(event.getAppid(), msg);
                 log.info("\r\n发送客服消息：{}\r\n结果：{}", msg, apiRes);
             }
         });
