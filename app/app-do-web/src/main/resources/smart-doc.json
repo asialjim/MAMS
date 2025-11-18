@@ -1,5 +1,5 @@
 {
-    "serverUrl": "https://dev.asialjim.cn/api/domain/app",
+    "serverUrl": "https://dev.gateway.api.asialjim.cn/api/domain/app",
     "outPath": "src/main/resources/static/doc",
     "isStrict": false,
     "allInOne": true,

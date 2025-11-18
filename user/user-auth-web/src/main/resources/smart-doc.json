@@ -1,5 +1,5 @@
 {
-    "serverUrl": "https://dev.asialjim.cn/api/open/user/auth",
+    "serverUrl": "https://dev.gateway.api.asialjim.cn/api/open/user/auth",
     "outPath": "src/main/resources/static/doc",
     "isStrict": false,
     "allInOne": true,
