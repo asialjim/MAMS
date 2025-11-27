@@ -47,10 +47,8 @@ public class UserIdCardSensitiveVo implements Serializable {
         if (Objects.isNull(idCard))
             return;
         this.realNameInfo.setType(idCard.getIdType());
-        this.realNameInfo.setName(SensitiveUtils.chineseName(idCard.getName()));
-        String idType = idCard.getIdType();
-        IdCardType idCardType = IdCardType.codeOf(idType);
-        this.realNameInfo.setNumber(SensitiveUtils.idCard(idCardType,idCard.getIdNo()));
+        this.realNameInfo.setName(idCard.getName());
+        this.realNameInfo.setNumber(idCard.getIdNo());
         this.realNameInfo.setGender(idCard.getGender());
         this.realNameInfo.setNationality(idCard.getNationality());
         this.realNameInfo.setBirthday(idCard.getBirthday());

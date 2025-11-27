@@ -21,7 +21,9 @@ import com.asialjim.microapplet.mams.user.infrastructure.datasource.mapper.IdCar
 import com.asialjim.microapplet.mams.user.infrastructure.datasource.po.IdCardUserPo;
 import com.asialjim.microapplet.mams.user.infrastructure.datasource.service.IdCardUserMapperService;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -56,5 +58,17 @@ public class IdCardUserMapperServiceImpl extends ServiceImpl<IdCardUserBaseMappe
                 .where(IdCardUserPo::getIdType).eq(idType)
                 .where(IdCardUserPo::getIdNo).eq(idNo)
                 .one();
+    }
+
+    @Override
+    @Caching(
+            evict = {
+                    @CacheEvict(value = UserCache.Name.idCardUserPosOf, key = "#po.userid"),
+                    @CacheEvict(value = UserCache.Name.idCardUserPosOf, key = "#po.userid + ':' + #po.idType"),
+                    @CacheEvict(value = UserCache.Name.idCardUserPosOf, key = "#po.userid + ':' + #po.idType + ':' + #po.idNo")
+            }
+    )
+    public boolean updateById(IdCardUserPo po) {
+        return super.updateById(po);
     }
 }

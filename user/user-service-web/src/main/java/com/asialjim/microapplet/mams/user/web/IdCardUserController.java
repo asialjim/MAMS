@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.asialjim.microapplet.mams.web;
+package com.asialjim.microapplet.mams.user.web;
 
 import com.asialjim.microapplet.mams.user.api.IdCardUserApi;
 import com.asialjim.microapplet.mams.user.vo.UserIdCardAuthenticateReq;
@@ -36,11 +36,25 @@ public class IdCardUserController {
     private final IdCardUserApi idCardUserApi;
 
 
+    /**
+     * 获取用户实名状态
+     *
+     * @param idType {@link String idType}
+     * @return {@link UserIdCardSensitiveVo }
+     * @since 2025/11/27
+     */
     @GetMapping("/status")
     public UserIdCardSensitiveVo status(@RequestParam(required = false) String idType) {
         return this.idCardUserApi.status(idType);
     }
 
+    /**
+     * 用户实名认证
+     *
+     * @param req {@link UserIdCardAuthenticateReq req}
+     * @return {@link UserIdCardSensitiveVo }
+     * @since 2025/11/27
+     */
     @PostMapping("/authenticate")
     public UserIdCardSensitiveVo authenticate(@RequestBody UserIdCardAuthenticateReq req) {
         return this.idCardUserApi.authenticate(req);

@@ -85,7 +85,13 @@ public class IdCardUserService {
             idCardUser.setName(name);
             idCardUser = this.idCardUserRepository.save(idCardUser);
             log.info("实名结果：{}", idCardUser);
+        } else {
+            exist.setName(name);
+            exist.setIdNo(number);
+            exist.setIdType(idCardType.getCode());
+            this.idCardUserRepository.updateById(exist);
         }
+
         // 真人认证
         if (StringUtils.isNotBlank(verifyChl) && Objects.nonNull(verifyParam) && verifyParam.isObject()) {
             // TODO
@@ -97,10 +103,10 @@ public class IdCardUserService {
     }
 
     public List<String> queryUseridByNameOfIdNoForAppid(String name, String idNo, String appid) {
-        if (StringUtils.isAllBlank(name,idNo))
+        if (StringUtils.isAllBlank(name, idNo))
             Res.ParameterEmptyEx.thr(Collections.singletonList("姓名、证件号不可都为空"));
         if (StringUtils.isNotBlank(appid))
             Res.ParameterEmptyEx.thr(Collections.singletonList("应用编号不可都为空"));
-        return this.idCardUserRepository.queryUseridByNameOfIdNoForAppid(name,idNo,appid);
+        return this.idCardUserRepository.queryUseridByNameOfIdNoForAppid(name, idNo, appid);
     }
 }

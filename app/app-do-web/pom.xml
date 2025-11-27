@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~    Copyright 2014-$year.today <a href="mailto:asialjim@qq.com">Asial Jim</a>
+  ~    Copyright 2014-2025 <a href="mailto:asialjim@qq.com">Asial Jim</a>
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -42,6 +42,10 @@
         </dependency>
 
 
+        <dependency>
+            <groupId>com.asialjim.microapplet</groupId>
+            <artifactId>commons-crypt-sensitive</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.asialjim.microapplet</groupId>
             <artifactId>commons-web-tomcat</artifactId>

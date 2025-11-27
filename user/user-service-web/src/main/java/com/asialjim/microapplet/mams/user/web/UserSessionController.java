@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.asialjim.microapplet.mams.web;
+package com.asialjim.microapplet.mams.user.web;
 
 import com.asialjim.microapplet.common.security.MamsSession;
 import com.asialjim.microapplet.common.security.MamsSessionAttribute;
@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/session")
-public class UserSessionController  {
+public class UserSessionController {
     @Resource
     private UserSessionApi userSessionApi;
     @Resource
@@ -50,6 +50,12 @@ public class UserSessionController  {
         return this.userSessionApi.login(vo);
     }
 
+    /**
+     * 获取当前用户会话信息
+     *
+     * @return {@link MamsSession }
+     * @since 2025/11/27
+     */
     @GetMapping
     public MamsSession current() {
         return this.mamsSessionAttribute.currentSession();

@@ -21,8 +21,6 @@ import com.asialjim.microapplet.mams.user.infrastructure.datasource.service.IdCa
 import com.asialjim.microapplet.mams.user.vo.IdCardUserVo;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryChain;
-import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.core.util.LambdaGetter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -86,5 +84,12 @@ public class IdCardUserRepository {
         return chain.select(IdCardUserPo::getUserid)
                 .pageAs(Page.of(1, 1000), String.class)
                 .getRecords();
+    }
+
+    public void updateById(IdCardUserVo exist) {
+        if (Objects.nonNull(exist)) {
+            boolean b = this.idCardUserMapperService.updateById(IdCardUserPo.fromVo(exist));
+            log.info("更新用户实名信息：{} 结果： {}", exist, b);
+        }
     }
 }

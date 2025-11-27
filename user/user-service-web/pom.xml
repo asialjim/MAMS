@@ -44,6 +44,10 @@
 
         <dependency>
             <groupId>com.asialjim.microapplet</groupId>
+            <artifactId>commons-crypt-sensitive</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asialjim.microapplet</groupId>
             <artifactId>commons-web-tomcat</artifactId>
         </dependency>
         <dependency>
@@ -63,6 +67,10 @@
             <artifactId>commons-security-core</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.asialjim.microapplet</groupId>
+            <artifactId>sensitive-spring</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

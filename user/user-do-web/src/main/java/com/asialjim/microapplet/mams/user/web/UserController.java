@@ -16,12 +16,11 @@
 
 package com.asialjim.microapplet.mams.user.web;
 
+import com.asialjim.microapplet.common.concurrent.ConcurrentRunner;
 import com.asialjim.microapplet.common.security.MamsSession;
 import com.asialjim.microapplet.mams.user.api.UserApi;
 import com.asialjim.microapplet.mams.user.service.UserService;
-import com.asialjim.microapplet.mams.user.vo.UpdateAvatarReq;
-import com.asialjim.microapplet.mams.user.vo.UpdateNicknameReq;
-import com.asialjim.microapplet.mams.user.vo.UserVo;
+import com.asialjim.microapplet.mams.user.vo.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,14 +51,12 @@ public class UserController implements UserApi {
     }
 
     /**
-     * 获取当前登录用户手机号
-     *
-     * @return {@link String }
-     * @since 2025/10/24
+     * 用户简介信息
+     * @since 2025/11/26
      */
     @Override
-    public String currentUserPhone() {
-        return this.userService.currentUserPhone();
+    public UserBriefVo brief() {
+        return this.userService.brief();
     }
 
     /**
@@ -75,17 +72,6 @@ public class UserController implements UserApi {
     }
 
     /**
-     * 获取当前用户昵称
-     *
-     * @return {@link String }
-     * @since 2025/10/24
-     */
-    @Override
-    public String currentNickname() {
-        return this.userService.currentNickname();
-    }
-
-    /**
      * 更新当前用户昵称
      *
      * @param req {@link UpdateNicknameReq req}
@@ -95,17 +81,6 @@ public class UserController implements UserApi {
     @Override
     public String updateNickname(@RequestBody UpdateNicknameReq req) {
         return this.userService.updateNickname(req);
-    }
-
-    /**
-     * 获取当前用户头像
-     *
-     * @return {@link String }
-     * @since 2025/10/24
-     */
-    @Override
-    public String currentAvatar() {
-        return this.userService.currentAvatar();
     }
 
     /**

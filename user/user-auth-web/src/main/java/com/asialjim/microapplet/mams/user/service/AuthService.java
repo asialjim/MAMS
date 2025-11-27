@@ -23,6 +23,7 @@ import com.asialjim.microapplet.common.security.MamsSession;
 import com.asialjim.microapplet.common.utils.PasswordStorage;
 import com.asialjim.microapplet.commons.security.Role;
 import com.asialjim.microapplet.mams.app.api.ChlAppApi;
+import com.asialjim.microapplet.mams.app.cons.ChannelAppType;
 import com.asialjim.microapplet.mams.app.cons.ChannelType;
 import com.asialjim.microapplet.mams.app.context.AppRs;
 import com.asialjim.microapplet.mams.app.context.ChlRs;
@@ -87,6 +88,14 @@ public class AuthService {
         } else {
             chlAppVo = this.chlAppApi.queryByAppidAndChlAndChlAppType(appid, chl, chlAppType);
         }
+
+        if (Objects.isNull(chlAppVo)){
+            String username = req.getUsername();
+            // 超管
+            if (StringUtils.equalsIgnoreCase(username, ChannelAppType.ROOT.getCode()))
+                chlAppVo = this.chlAppApi.queryByAppidAndChlAndChlAppType(appid, chl, ChannelAppType.ROOT.getCode());
+        }
+
         if (Objects.isNull(chlAppVo)) throw AppRs.NoSuchChlApp.ex();
 
         if (log.isDebugEnabled()) log.debug("登录渠道应用:{}", chlAppVo);

@@ -74,6 +74,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>
         </dependency>
+
+
+        <dependency>
+            <groupId>com.asialjim.microapplet</groupId>
+            <artifactId>commons-crypt-sensitive</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.asialjim.microapplet</groupId>
             <artifactId>commons-web-tomcat</artifactId>

@@ -1,3 +1,19 @@
+/*
+ *    Copyright 2014-2025 <a href="mailto:asialjim@qq.com">Asial Jim</a>
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 let api = [];
 const apiDocListSize = 1
 api.push({
@@ -106,9 +122,9 @@ api[0].list[3].list.push({
 api[0].list[3].list.push({
     order: '2',
     deprecated: 'false',
-    url: 'https://dev.gateway.api.asialjim.cn/api/domain/user/user/phone',
-    methodId: 'a347c210424145573af30d8387ea2f03',
-    desc: '获取当前登录用户手机号',
+    url: 'https://dev.gateway.api.asialjim.cn/api/domain/user/user/brief',
+    methodId: '9cd69a5dfd06412711cf0ceb63dce048',
+    desc: '用户简介信息',
 });
 api[0].list[3].list.push({
     order: '3',
@@ -121,35 +137,21 @@ api[0].list[3].list.push({
     order: '4',
     deprecated: 'false',
     url: 'https://dev.gateway.api.asialjim.cn/api/domain/user/user/nickname',
-    methodId: '29643270b9a1111d4647e0b4c0e3e57f',
-    desc: '获取当前用户昵称',
+    methodId: 'e6256763af703475d093de86ad181854',
+    desc: '更新当前用户昵称',
 });
 api[0].list[3].list.push({
     order: '5',
     deprecated: 'false',
-    url: 'https://dev.gateway.api.asialjim.cn/api/domain/user/user/nickname',
-    methodId: '3f1e7e7235d76b29e2d7624e2589dac5',
-    desc: '更新当前用户昵称',
+    url: 'https://dev.gateway.api.asialjim.cn/api/domain/user/user/avatar',
+    methodId: '29534a49198467aeddf03fa7e2fe1f37',
+    desc: '更新当前用户头像',
 });
 api[0].list[3].list.push({
     order: '6',
     deprecated: 'false',
     url: 'https://dev.gateway.api.asialjim.cn/api/domain/user/user/avatar',
-    methodId: 'eb7ba5e1663e22ae95777af0c3a29f3a',
-    desc: '获取当前用户头像',
-});
-api[0].list[3].list.push({
-    order: '7',
-    deprecated: 'false',
-    url: 'https://dev.gateway.api.asialjim.cn/api/domain/user/user/avatar',
-    methodId: '86e2d69814cd495cbcae35a3742a7ba3',
-    desc: '更新当前用户头像',
-});
-api[0].list[3].list.push({
-    order: '8',
-    deprecated: 'false',
-    url: 'https://dev.gateway.api.asialjim.cn/api/domain/user/user/avatar',
-    methodId: '8e2aa6da281e4845d703ba7c1735b33e',
+    methodId: 'b5d9e50d3d2bb5869e3aea1bfbf81f8e',
     desc: '上传当前用户头像并更新',
 });
 api[0].list.push({

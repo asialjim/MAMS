@@ -19,22 +19,36 @@ package com.asialjim.microapplet.mams.user.vo;
 import com.asialjim.microapplet.sensitive.annotation.Sensitive;
 import com.asialjim.microapplet.sensitive.handler.SensitiveType;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 更新用户昵称请求
+ * 用户简介信息
  *
  * @author <a href="mailto:asialjim@hotmail.com">Asial Jim</a>
  * @version 1.0
- * @since 2025/10/21, &nbsp;&nbsp; <em>version:1.0</em>
+ * @since 2025/11/26, &nbsp;&nbsp; <em>version:1.0</em>
  */
 @Data
-public class UpdateNicknameReq implements Serializable {
-
+@Accessors(chain = true)
+public class UserBriefVo implements Serializable {
     @Serial
-    private static final long serialVersionUID = 4934819406030276217L;
-    @Sensitive(value = SensitiveType.Customer,match = false)
+    private static final long serialVersionUID = 897205812887454614L;
+
+    /**
+     * 手机号
+     */
+    @Sensitive(SensitiveType.ChineseMobilePhone)
+    private String phone;
+    /**
+     * 昵称
+     */
+    @Sensitive(value = SensitiveType.Customer, match = false)
     private String nickname;
+    /**
+     * 头像
+     */
+    private String avatar;
 }

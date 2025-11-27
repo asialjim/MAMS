@@ -7,6 +7,7 @@ spring:
 
   config:
     import:
+      - nacos:sensitive_enc.yaml
       - nacos:feign.yaml
       - nacos:redis.yaml
       - nacos:datasource.yaml

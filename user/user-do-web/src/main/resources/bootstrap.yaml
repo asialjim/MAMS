@@ -6,6 +6,7 @@ spring:
     name: user-domain
   config:
     import:
+      - nacos:sensitive_enc.yaml
       - nacos:feign.yaml
       - nacos:redis.yaml
       - nacos:dynamic.datasource.yaml

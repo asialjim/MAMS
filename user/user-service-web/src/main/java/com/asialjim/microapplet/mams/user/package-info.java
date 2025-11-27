@@ -14,27 +14,4 @@
  *    limitations under the License.
  */
 
-package com.asialjim.microapplet.mams.user.vo;
-
-import com.asialjim.microapplet.sensitive.annotation.Sensitive;
-import com.asialjim.microapplet.sensitive.handler.SensitiveType;
-import lombok.Data;
-
-import java.io.Serial;
-import java.io.Serializable;
-
-/**
- * 更新用户昵称请求
- *
- * @author <a href="mailto:asialjim@hotmail.com">Asial Jim</a>
- * @version 1.0
- * @since 2025/10/21, &nbsp;&nbsp; <em>version:1.0</em>
- */
-@Data
-public class UpdateNicknameReq implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 4934819406030276217L;
-    @Sensitive(value = SensitiveType.Customer,match = false)
-    private String nickname;
-}
+package com.asialjim.microapplet.mams.user;

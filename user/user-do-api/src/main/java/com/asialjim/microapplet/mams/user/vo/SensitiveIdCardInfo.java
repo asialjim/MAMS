@@ -16,6 +16,8 @@
 
 package com.asialjim.microapplet.mams.user.vo;
 
+import com.asialjim.microapplet.sensitive.annotation.Sensitive;
+import com.asialjim.microapplet.sensitive.handler.SensitiveType;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -43,10 +45,12 @@ public class SensitiveIdCardInfo implements Serializable {
     /**
      * 证件名称
      */
+    @Sensitive(SensitiveType.ChineseName)
     private String name;
     /**
      * 证件号
      */
+    @Sensitive(SensitiveType.ChineseCitizenIdCard)
     private String number;
 
     /**

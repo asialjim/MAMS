@@ -1,5 +1,5 @@
 /*
- *    Copyright 2014-$year.today <a href="mailto:asialjim@qq.com">Asial Jim</a>
+ *    Copyright 2014-2025 <a href="mailto:asialjim@qq.com">Asial Jim</a>
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public class ChlAppController implements ChlAppApi {
         return vos.stream()
                 .filter(Objects::nonNull)
                 .filter(item -> StringUtils.equals(item.getChlAppId(), "root"))
-                .filter(item -> StringUtils.equals(item.getChlAppType(), ChannelAppType.CMS.getCode()))
+                .filter(item -> StringUtils.equals(item.getChlAppType(), ChannelAppType.ROOT.getCode()))
                 .findAny()
                 .orElseGet(() -> {
                     ChlAppVo vo = new ChlAppVo();
@@ -116,7 +116,7 @@ public class ChlAppController implements ChlAppApi {
                     vo.setOrgId("root");
                     vo.setChlType(ChannelType.PC.getCode());
                     vo.setChlAppId("root");
-                    vo.setChlAppType(ChannelAppType.CMS.getCode());
+                    vo.setChlAppType(ChannelAppType.ROOT.getCode());
                     vo.setChlAppName("超管应用");
                     vo.setDeleted(false);
                     vo.setCreateTime(LocalDateTime.now());

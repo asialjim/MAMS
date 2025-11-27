@@ -16,28 +16,24 @@
 
 package com.asialjim.microapplet.mams.user.service;
 
+import com.asialjim.microapplet.common.concurrent.ConcurrentRunner;
 import com.asialjim.microapplet.common.security.MamsSession;
 import com.asialjim.microapplet.common.security.MamsSessionAttribute;
-import com.asialjim.microapplet.common.utils.SensitiveUtils;
 import com.asialjim.microapplet.mams.app.cons.ChannelAppType;
 import com.asialjim.microapplet.mams.app.cons.ChannelType;
 import com.asialjim.microapplet.mams.user.infrastructure.datasource.po.ChlUserPo;
 import com.asialjim.microapplet.mams.user.infrastructure.datasource.po.UserPo;
 import com.asialjim.microapplet.mams.user.infrastructure.datasource.repository.ChlUserRepository;
 import com.asialjim.microapplet.mams.user.infrastructure.datasource.repository.UserRepository;
-import com.asialjim.microapplet.mams.user.vo.UpdateAvatarReq;
-import com.asialjim.microapplet.mams.user.vo.UpdateNicknameReq;
-import com.asialjim.microapplet.mams.user.vo.UserVo;
+import com.asialjim.microapplet.mams.user.vo.*;
 import com.asialjim.microapplet.mams.wx.common.api.WeChatUserApi;
 import com.asialjim.microapplet.mams.wx.common.vo.UpdateAvatarRequest;
 import com.asialjim.microapplet.mams.wx.common.vo.UpdateNicknameRequest;
 import com.asialjim.microapplet.wechat.user.WeChatUserVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -64,6 +60,7 @@ public class UserService {
     private WeChatUserApi weChatUserApi;
 
     public String updateNickname(UpdateNicknameReq req) {
+        //noinspection DuplicatedCode
         Boolean notBlank = Optional.ofNullable(req).map(UpdateNicknameReq::getNickname).map(StringUtils::isNotBlank).orElse(false);
         if (Boolean.FALSE.equals(notBlank))
             return StringUtils.EMPTY;
@@ -71,6 +68,7 @@ public class UserService {
         MamsSession mamsSession = this.mamsSessionAttribute.currentLoginSession();
         ChannelType channelType = ChannelType.codeOf(mamsSession.getChl());
         // TODO 重构
+        //noinspection SwitchStatementWithTooFewBranches
         switch (channelType) {
             case WeChat -> {
                 WeChatUserVo weChatUserVo = this.weChatUserApi.updateNicknameByOpenid(mamsSession.getChlUserid(), new UpdateNicknameRequest().setNickname(req.getNickname()));
@@ -89,11 +87,14 @@ public class UserService {
             String avatar = Base64.getEncoder().encodeToString(byteArray);
             return updateAvatar(new UpdateAvatarReq().setAvatar(avatar));
         } catch (Throwable ignored) {
+
+            MamsSession mamsSession = this.mamsSessionAttribute.currentLoginSession();
+            return avatar(mamsSession);
         }
-        return currentAvatar();
     }
 
     public String updateAvatar(UpdateAvatarReq req) {
+        //noinspection DuplicatedCode
         Boolean notBlank = Optional.ofNullable(req).map(UpdateAvatarReq::getAvatar).map(StringUtils::isNotBlank).orElse(false);
         if (Boolean.FALSE.equals(notBlank))
             return StringUtils.EMPTY;
@@ -101,6 +102,7 @@ public class UserService {
         MamsSession mamsSession = this.mamsSessionAttribute.currentLoginSession();
         ChannelType channelType = ChannelType.codeOf(mamsSession.getChl());
         // TODO 重构
+        //noinspection SwitchStatementWithTooFewBranches
         switch (channelType) {
             case WeChat -> {
                 WeChatUserVo weChatUserVo = this.weChatUserApi.updateAvatarByOpenid(mamsSession.getChlUserid(), new UpdateAvatarRequest().setAvatar(req.getAvatar()));
@@ -113,10 +115,11 @@ public class UserService {
         return req.getAvatar();
     }
 
-    public String currentAvatar() {
-        MamsSession mamsSession = this.mamsSessionAttribute.currentLoginSession();
+
+    private String avatar(MamsSession mamsSession) {
         ChannelType channelType = ChannelType.codeOf(mamsSession.getChl());
         // TODO 重构
+        //noinspection SwitchStatementWithTooFewBranches
         switch (channelType) {
             case WeChat -> {
                 WeChatUserVo weChatUserVo = weChatUserApi.queryByOpenid(mamsSession.getChlUserid());
@@ -130,13 +133,13 @@ public class UserService {
     }
 
 
-    public String currentNickname() {
-        log.info("currentNickname...");
-        MamsSession mamsSession = this.mamsSessionAttribute.currentLoginSession();
+
+    private String nickname(MamsSession mamsSession) {
         log.info("mamsSession...");
         ChannelType channelType = ChannelType.codeOf(mamsSession.getChl());
         log.info("channelType: {}", channelType);
         // TODO 重构
+        //noinspection SwitchStatementWithTooFewBranches
         switch (channelType) {
             case WeChat -> {
                 log.info("openid: {}", mamsSession.getChlUnionid());
@@ -173,18 +176,24 @@ public class UserService {
 
         return Optional.ofNullable(chlUserPo)
                 .map(ChlUserPo::getChlUserid)
-                .map(SensitiveUtils::chinaMobilePhone)
                 .orElse(StringUtils.EMPTY);
     }
 
-    public String currentUserPhone() {
-        MamsSession mamsSession = this.mamsSessionAttribute.currentLoginSession();
-        return userPhone(mamsSession);
-    }
+
 
     public UserVo queryByUserid(String userid) {
         UserPo userPo = this.userRepository.queryById(userid);
         return UserPo.toVo(userPo);
     }
 
+    public UserBriefVo brief() {
+        UserBriefVo vo = new UserBriefVo();
+        MamsSession mamsSession = this.mamsSessionAttribute.currentLoginSession();
+        ConcurrentRunner.runAllTask(
+                () -> vo.setPhone(userPhone(mamsSession)),
+                () -> vo.setNickname(nickname(mamsSession)),
+                () -> vo.setAvatar(avatar(mamsSession))
+        );
+        return vo;
+    }
 }

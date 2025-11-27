@@ -17,9 +17,7 @@
 package com.asialjim.microapplet.mams.user.api;
 
 import com.asialjim.microapplet.common.security.MamsSession;
-import com.asialjim.microapplet.mams.user.vo.UpdateAvatarReq;
-import com.asialjim.microapplet.mams.user.vo.UpdateNicknameReq;
-import com.asialjim.microapplet.mams.user.vo.UserVo;
+import com.asialjim.microapplet.mams.user.vo.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,20 +34,14 @@ public interface UserApi {
     @GetMapping("/{id}")
     UserVo queryByUserid(@PathVariable("id") String userid);
 
-    @GetMapping("/phone")
-    String currentUserPhone();
+    @GetMapping("/brief")
+    UserBriefVo brief();
 
     @PostMapping("/phone")
     String userPhone(@RequestBody MamsSession session);
 
-    @GetMapping("/nickname")
-    String currentNickname();
-
     @PutMapping("/nickname")
     String updateNickname(@RequestBody UpdateNicknameReq req);
-
-    @GetMapping("/avatar")
-    String currentAvatar();
 
     @PutMapping("/avatar")
     String updateAvatar(@RequestBody UpdateAvatarReq req);
