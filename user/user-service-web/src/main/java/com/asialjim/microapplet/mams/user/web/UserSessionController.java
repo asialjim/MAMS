@@ -17,8 +17,8 @@
 package com.asialjim.microapplet.mams.user.web;
 
 import com.asialjim.microapplet.common.security.MamsSession;
-import com.asialjim.microapplet.common.security.MamsSessionAttribute;
 import com.asialjim.microapplet.mams.user.api.UserSessionApi;
+import com.asialjim.microapplet.mams.user.service.UserSessionService;
 import com.asialjim.microapplet.mams.user.vo.ChlUserVo;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +36,7 @@ public class UserSessionController {
     @Resource
     private UserSessionApi userSessionApi;
     @Resource
-    private MamsSessionAttribute mamsSessionAttribute;
+    private UserSessionService userSessionService;
 
 
     /**
@@ -58,6 +58,6 @@ public class UserSessionController {
      */
     @GetMapping
     public MamsSession current() {
-        return this.mamsSessionAttribute.currentSession();
+        return this.userSessionService.currentSession();
     }
 }

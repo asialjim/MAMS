@@ -20,16 +20,10 @@ import com.asialjim.microapplet.common.cons.Headers;
 import com.asialjim.microapplet.common.security.MamsSession;
 import com.asialjim.microapplet.common.security.MamsSessionAttribute;
 import com.asialjim.microapplet.common.utils.JsonUtil;
-import com.asialjim.microapplet.commons.security.Role;
 import com.asialjim.microapplet.mams.user.api.AuthApi;
-import com.asialjim.microapplet.mams.user.api.ChlUserApi;
-import com.asialjim.microapplet.mams.user.api.IdCardUserApi;
-import com.asialjim.microapplet.mams.user.vo.ChlUserVo;
-import com.asialjim.microapplet.mams.user.vo.IdCardUserVo;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -38,7 +32,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.WebUtils;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -54,10 +47,6 @@ import java.util.Optional;
 public class UserMamsSessionAttribute implements MamsSessionAttribute {
     @Resource
     private AuthApi authApi;
-    @Resource
-    private ChlUserApi chlUserApi;
-    @Resource
-    private IdCardUserApi idCardUserApi;
 
     @Override
     public MamsSession currentSession() {
@@ -73,7 +62,7 @@ public class UserMamsSessionAttribute implements MamsSessionAttribute {
 
         String sessionJson = request.getHeader(Headers.CURRENT_SESSION);
         if (StringUtils.isNotBlank(sessionJson))
-            return updateRole(JsonUtil.instance.toBean(sessionJson, MamsSession.class));
+            return JsonUtil.instance.toBean(sessionJson, MamsSession.class);
 
         String token = request.getHeader(Headers.AUTHORIZATION);
         if (StringUtils.isBlank(token))
@@ -82,41 +71,8 @@ public class UserMamsSessionAttribute implements MamsSessionAttribute {
         if (StringUtils.isBlank(token))
             return new MamsSession();
 
-        MamsSession session = authApi.auth(token);
-        return updateRole(session);
+        return authApi.auth(token);
     }
-
-    private MamsSession updateRole(MamsSession session) {
-        if (Objects.isNull(session))
-            return null;
-        long bit = 0;
-        bit |= Role.TOURIST_BIT;
-        bit |= session.getRoleBit();
-        bit |= Role.AUTHENTICATED_BIT;
-
-        String userid = session.getUserid();
-        List<ChlUserVo> chlUserVos = this.chlUserApi.queryByUserid(userid);
-
-        // 添加渠道用户角色表
-        if (CollectionUtils.isNotEmpty(chlUserVos)) {
-            for (ChlUserVo chlUserVo : chlUserVos) {
-                if (Objects.isNull(chlUserVo))
-                    continue;
-                Long roleBit = chlUserVo.getRoleBit();
-                if (Objects.isNull(roleBit))
-                    continue;
-                bit |= roleBit;
-            }
-        }
-
-        // 判定证件用户角色
-        List<IdCardUserVo> idCardUserVos = this.idCardUserApi.queryByUserid(userid);
-        if (CollectionUtils.isNotEmpty(idCardUserVos))
-            bit |= Role.ID_CARD_USER_BIT;
-        session.setRoleBit(bit);
-        return session;
-    }
-
 
     @Override
     public int getOrder() {

@@ -15,3 +15,27 @@
  */
 
 package com.asialjim.microapplet.mams.user.service;
+
+import com.asialjim.microapplet.common.security.MamsSession;
+import com.asialjim.microapplet.common.security.MamsSessionAttribute;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
+
+/**
+ * 用户会话服务
+ *
+ * @author <a href="mailto:asialjim@hotmail.com">Asial Jim</a>
+ * @version 1.0
+ * @since 2025/12/2, &nbsp;&nbsp; <em>version:1.0</em>
+ */
+@Service
+public class UserSessionService {
+
+    @Resource
+    private MamsSessionAttribute mamsSessionAttribute;
+
+
+    public MamsSession currentSession() {
+        return this.mamsSessionAttribute.currentSession();
+    }
+}

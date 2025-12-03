@@ -18,7 +18,6 @@ package com.asialjim.microapplet.mams.user.infrastructure.config;
 
 import com.asialjim.microapplet.common.context.Res;
 import com.asialjim.microapplet.common.security.MamsSession;
-import com.asialjim.microapplet.common.utils.PasswordStorage;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -26,6 +25,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +46,7 @@ import static com.asialjim.microapplet.common.cons.Headers.*;
  * @since 2025/9/23, &nbsp;&nbsp; <em>version:1.0</em>
  */
 @Data
+@Slf4j
 @Configuration
 @ConfigurationProperties(prefix = "user.auth.jwt")
 public class JwtConfigProperty implements Serializable {
@@ -101,39 +102,47 @@ public class JwtConfigProperty implements Serializable {
 
 
     public void verify(String jwtToken, MamsSession session) {
+        log.info("认证进入");
         if (Objects.isNull(session))
             Res.UserAuthFailure401Thr.thr(Collections.singletonList("用户未登录或登录已过期"));
 
         DecodedJWT jwt = verify(jwtToken);
+        log.info("认证:{}",jwt);
 
         if (!StringUtils.equals(session.getToken(), jwtToken))
             Res.UserAuthFailure401Thr.thr(Collections.singletonList("令牌不匹配"));
 
         String sessionId = body(SessionId, jwt);
+        log.info("认证sessionId:{}",sessionId);
         if (!StringUtils.equals(sessionId, session.getId()))
             Res.UserAuthFailure401Thr.thr(Collections.singletonList("会话不匹配"));
 
-        try {
+        /*try {
             boolean b = PasswordStorage.verifyPassword(sessionId, body(USER_TOKEN, jwt));
+            log.info("认证sessionId:{} 由后台生成",sessionId);
             if (!b)
                 Res.UserAuthFailure401Thr.thr(Collections.singletonList("非法令牌"));
         } catch (Throwable e) {
             Res.UserAuthFailure401Thr.thr(Collections.singletonList("非法令牌"));
-        }
+        }*/
 
         String appid = body(APP_ID, jwt);
+        log.info("认证appid:{} ",appid);
         if (!StringUtils.equals(appid, session.getAppid()))
             Res.UserAuthFailure401Thr.thr(Arrays.asList("应用不匹配", "会话应用:" + session.getAppid(), "访问应用:" + appid));
 
         String chl = body(APP_CHL, jwt);
+        log.info("认证chl:{} ",chl);
         if (!StringUtils.equals(chl, session.getChl()))
             Res.UserAuthFailure401Thr.thr(Arrays.asList("渠道不匹配", "会话渠道:" + session.getChl(), "访问渠道:" + chl));
 
         String chlAppid = body(APP_CHL_APPID, jwt);
+        log.info("认证chlAppid:{} ",chlAppid);
         if (!StringUtils.equals(chlAppid, session.getChlAppid()))
             Res.UserAuthFailure401Thr.thr(Arrays.asList("渠道应用不匹配", "会话渠道应用:" + session.getChlAppid(), "访问渠道应用:" + chlAppid));
 
         String issuer = jwt.getIssuer();
+        log.info("认证issuer:{} ",issuer);
         if (!StringUtils.equals(issuer, getIssuer()))
             Res.UserAuthFailure401Thr.thr(Collections.singletonList("令牌签发非法"));
     }
