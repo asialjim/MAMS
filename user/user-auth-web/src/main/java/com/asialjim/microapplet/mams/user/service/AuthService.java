@@ -22,6 +22,7 @@ import com.asialjim.microapplet.common.context.Result;
 import com.asialjim.microapplet.common.security.MamsSession;
 import com.asialjim.microapplet.common.utils.MamsTokenUtil;
 import com.asialjim.microapplet.commons.security.Role;
+import com.asialjim.microapplet.hermes.event.EventBus;
 import com.asialjim.microapplet.mams.app.api.ChlAppApi;
 import com.asialjim.microapplet.mams.app.cons.ChannelAppType;
 import com.asialjim.microapplet.mams.app.cons.ChannelType;
@@ -215,6 +216,8 @@ public class AuthService implements ApplicationRunner {
 
         MamsSession mamsSession = this.sessionRepository.setCache(session);
         log.info("令牌续期：{} 会话：{}", token, mamsSession);
+        // 发送令牌续期事件
+        EventBus.push(mamsSession);
         return mamsSession;
     }
 

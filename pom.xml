@@ -185,6 +185,13 @@
             </dependency>
             <dependency>
                 <groupId>com.asialjim.microapplet</groupId>
+                <artifactId>hermes-zen-dependencies</artifactId>
+                <version>${com.asialjim.microapplet}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.asialjim.microapplet</groupId>
                 <artifactId>remote-zen-pom</artifactId>
                 <version>${com.asialjim.microapplet}</version>
                 <type>pom</type>
