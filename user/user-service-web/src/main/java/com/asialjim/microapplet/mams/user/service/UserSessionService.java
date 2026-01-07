@@ -18,8 +18,14 @@ package com.asialjim.microapplet.mams.user.service;
 
 import com.asialjim.microapplet.common.security.MamsSession;
 import com.asialjim.microapplet.common.security.MamsSessionAttribute;
+import com.asialjim.microapplet.hermes.annotation.OnEvent;
+import com.asialjim.microapplet.mams.user.event.MamsSessionContinue;
+import com.asialjim.microapplet.mams.user.infrastructure.repository.SessionRepository;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 /**
  * 用户会话服务
@@ -28,12 +34,26 @@ import org.springframework.stereotype.Service;
  * @version 1.0
  * @since 2025/12/2, &nbsp;&nbsp; <em>version:1.0</em>
  */
+@Slf4j
 @Service
 public class UserSessionService {
 
     @Resource
     private MamsSessionAttribute mamsSessionAttribute;
+    @Resource
+    private SessionRepository sessionRepository;
 
+    @OnEvent
+    @SuppressWarnings("unused")
+    public void onMamsSessionAuth(MamsSessionContinue sessionContinue) {
+        MamsSession session = sessionContinue.getSession();
+        log.info("Hermes 监听器 onMamsSessionAuth 收到用户会话保持事件：{}", sessionContinue);
+        if (Objects.isNull(session)) {
+            return;
+        }
+        MamsSession mamsSession = sessionRepository.setCache(session);
+        log.info("监听器：onMamsSessionAuth 用户会话事件保持处理结束：{}", mamsSession);
+    }
 
     public MamsSession currentSession() {
         return this.mamsSessionAttribute.currentSession();

@@ -19,16 +19,20 @@ package com.asialjim.microapplet.mams.user.service;
 import com.asialjim.microapplet.common.concurrent.ConcurrentRunner;
 import com.asialjim.microapplet.common.security.MamsSession;
 import com.asialjim.microapplet.common.security.MamsSessionAttribute;
+import com.asialjim.microapplet.hermes.event.EventBus;
 import com.asialjim.microapplet.mams.app.cons.ChannelAppType;
 import com.asialjim.microapplet.mams.app.cons.ChannelType;
 import com.asialjim.microapplet.mams.user.infrastructure.datasource.po.ChlUserPo;
 import com.asialjim.microapplet.mams.user.infrastructure.datasource.po.UserPo;
 import com.asialjim.microapplet.mams.user.infrastructure.datasource.repository.ChlUserRepository;
 import com.asialjim.microapplet.mams.user.infrastructure.datasource.repository.UserRepository;
-import com.asialjim.microapplet.mams.user.vo.*;
+import com.asialjim.microapplet.mams.user.vo.UpdateAvatarReq;
+import com.asialjim.microapplet.mams.user.vo.UpdateNicknameReq;
+import com.asialjim.microapplet.mams.user.vo.UserBriefVo;
+import com.asialjim.microapplet.mams.user.vo.UserVo;
 import com.asialjim.microapplet.mams.wx.common.api.WeChatUserApi;
+import com.asialjim.microapplet.mams.wx.common.event.WeChatUserNicknameUpdated;
 import com.asialjim.microapplet.mams.wx.common.vo.UpdateAvatarRequest;
-import com.asialjim.microapplet.mams.wx.common.vo.UpdateNicknameRequest;
 import com.asialjim.microapplet.wechat.user.WeChatUserVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -71,8 +75,12 @@ public class UserService {
         //noinspection SwitchStatementWithTooFewBranches
         switch (channelType) {
             case WeChat -> {
+                EventBus.push(new WeChatUserNicknameUpdated().setOpenid(mamsSession.getChlUserid()).setNickname(req.getNickname()));
+                log.info("发布微信用户昵称更新事件结束");
+               /*
                 WeChatUserVo weChatUserVo = this.weChatUserApi.updateNicknameByOpenid(mamsSession.getChlUserid(), new UpdateNicknameRequest().setNickname(req.getNickname()));
                 return Optional.ofNullable(weChatUserVo).map(WeChatUserVo::getNickname).orElse(StringUtils.EMPTY);
+                */
             }
             default -> {
 

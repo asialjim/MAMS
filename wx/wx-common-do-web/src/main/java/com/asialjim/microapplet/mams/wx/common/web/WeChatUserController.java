@@ -16,12 +16,15 @@
 
 package com.asialjim.microapplet.mams.wx.common.web;
 
+import com.asialjim.microapplet.hermes.annotation.OnEvent;
 import com.asialjim.microapplet.mams.wx.common.api.WeChatUserApi;
+import com.asialjim.microapplet.mams.wx.common.event.WeChatUserNicknameUpdated;
 import com.asialjim.microapplet.mams.wx.common.vo.UpdateAvatarRequest;
 import com.asialjim.microapplet.mams.wx.common.vo.UpdateNicknameRequest;
 import com.asialjim.microapplet.wechat.user.WeChatUserRepository;
 import com.asialjim.microapplet.wechat.user.WeChatUserVo;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @version 1.0
  * @since 2025/10/20, &nbsp;&nbsp; <em>version:1.0</em>
  */
+@Slf4j
 @RestController
 @RequestMapping(WeChatUserApi.path)
 public class WeChatUserController implements WeChatUserApi {
@@ -54,5 +58,11 @@ public class WeChatUserController implements WeChatUserApi {
     @Override
     public WeChatUserVo updateNicknameByOpenid(@PathVariable("id") String id, @RequestBody UpdateNicknameRequest req) {
         return this.weChatUserRepository.updateNicknameByOpenid(id,req.getNickname());
+    }
+
+    @OnEvent
+    public void onWeChatUserNicknameUpdated(WeChatUserNicknameUpdated event){
+        log.info("微信用户昵称更新事件进入：{}",event);
+        this.weChatUserRepository.updateNicknameByOpenid(event.getOpenid(),event.getNickname());
     }
 }

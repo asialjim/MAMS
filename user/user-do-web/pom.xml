@@ -58,6 +58,10 @@
 
         <dependency>
             <groupId>com.asialjim.microapplet</groupId>
+            <artifactId>hermes-spring-redis-mybatis-flex</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asialjim.microapplet</groupId>
             <artifactId>commons-crypt-sensitive</artifactId>
         </dependency>
         <dependency>

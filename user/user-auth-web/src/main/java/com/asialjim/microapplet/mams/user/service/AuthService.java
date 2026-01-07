@@ -31,6 +31,7 @@ import com.asialjim.microapplet.mams.app.context.ChlRs;
 import com.asialjim.microapplet.mams.app.vo.ChlAppVo;
 import com.asialjim.microapplet.mams.user.api.ChlUserApi;
 import com.asialjim.microapplet.mams.user.api.IdCardUserApi;
+import com.asialjim.microapplet.mams.user.event.MamsSessionContinue;
 import com.asialjim.microapplet.mams.user.infrastructure.config.JwtConfigProperty;
 import com.asialjim.microapplet.mams.user.infrastructure.repository.SessionRepository;
 import com.asialjim.microapplet.mams.user.service.login.ChlLoginStrategy;
@@ -41,9 +42,12 @@ import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
@@ -66,7 +70,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Slf4j
 @Component
-public class AuthService implements ApplicationRunner {
+public class AuthService implements ApplicationRunner, MessageListener {
     private Thread subscriptionThread;
 
     @Resource
@@ -213,12 +217,15 @@ public class AuthService implements ApplicationRunner {
             log.info("添加证件角色结果：{}", BigInteger.valueOf(bit).toString(2));
         }
         session.setRoleBit(bit);
-
+        /*
         MamsSession mamsSession = this.sessionRepository.setCache(session);
         log.info("令牌续期：{} 会话：{}", token, mamsSession);
+        */
         // 发送令牌续期事件
-        EventBus.push(mamsSession);
-        return mamsSession;
+        MamsSessionContinue mamsSessionContinue = new MamsSessionContinue().setSession(session);
+        EventBus.push(mamsSessionContinue);
+        log.info("发送用户会话保持事件：{}",mamsSessionContinue);
+        return session;
     }
 
 
@@ -237,6 +244,7 @@ public class AuthService implements ApplicationRunner {
 
 
     public void startSubscription() {
+       /*
         subscriptionThread = new Thread(() -> {
             try {
                 subscribeToCacheInvalidation();
@@ -248,6 +256,7 @@ public class AuthService implements ApplicationRunner {
         subscriptionThread.setDaemon(true);
         subscriptionThread.start();
         log.info("Redis订阅服务已启动");
+        */
     }
 
     private void subscribeToCacheInvalidation() {
@@ -291,5 +300,25 @@ public class AuthService implements ApplicationRunner {
      */
     public void logout(String token) {
         this.sessionRepository.deleteCache(token);
+    }
+
+    @Override
+    public void onMessage(Message message, byte[] channel) {
+        if (ArrayUtils.isEmpty(channel))
+            return;
+        //noinspection ConstantValue
+        if (Objects.isNull(message))
+            return;
+
+        assert channel != null;
+        String key = new String(channel, StandardCharsets.UTF_8);
+        if (!Headers.CURRENT_SESSION.equals(key)) {
+            return;
+        }
+
+        byte[] body = message.getBody();
+        String token = new String(body, StandardCharsets.UTF_8);
+        log.info("Gateway Token {} Got...", token);
+        auth(token);
     }
 }
