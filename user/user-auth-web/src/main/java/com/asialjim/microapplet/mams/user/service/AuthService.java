@@ -30,36 +30,32 @@ import com.asialjim.microapplet.mams.app.context.AppRs;
 import com.asialjim.microapplet.mams.app.context.ChlRs;
 import com.asialjim.microapplet.mams.app.vo.ChlAppVo;
 import com.asialjim.microapplet.mams.user.api.ChlUserApi;
-import com.asialjim.microapplet.mams.user.api.IdCardUserApi;
 import com.asialjim.microapplet.mams.user.event.MamsSessionContinue;
 import com.asialjim.microapplet.mams.user.infrastructure.config.JwtConfigProperty;
 import com.asialjim.microapplet.mams.user.infrastructure.repository.SessionRepository;
 import com.asialjim.microapplet.mams.user.service.login.ChlLoginStrategy;
 import com.asialjim.microapplet.mams.user.vo.ChlUserVo;
-import com.asialjim.microapplet.mams.user.vo.IdCardUserVo;
 import com.asialjim.microapplet.mams.user.vo.LoginReq;
 import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 用户认证服务
@@ -70,19 +66,15 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Slf4j
 @Component
-public class AuthService implements ApplicationRunner, MessageListener {
-    private Thread subscriptionThread;
-
+public class AuthService implements ApplicationRunner, MessageListener, InitializingBean {
+    @Resource
+    private RedisMessageListenerContainer redisMessageListenerContainer;
     @Resource
     private List<ChlLoginStrategy> chlLoginStrategies;
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
     @Resource
     private JwtConfigProperty jwtConfigProperty;
     @Resource
     private SessionRepository sessionRepository;
-    @Resource
-    private IdCardUserApi idCardUserApi;
     @Resource
     private ChlUserApi chlUserApi;
     @Resource
@@ -122,9 +114,6 @@ public class AuthService implements ApplicationRunner, MessageListener {
         ChannelType channelType = ChlAppVo.channelType(chlAppVo);
         if (log.isDebugEnabled()) log.debug("登录渠道:{}", channelType);
         MamsSession session = strategy(channelType).login(chlAppVo, req);
-
-
-
 
 
         String userid = session.getUserid();
@@ -181,50 +170,9 @@ public class AuthService implements ApplicationRunner, MessageListener {
 
         if (session.isExpired())
             Res.UserAuthFailure401Thr.thr(Collections.singletonList("用户未登录或登录已过期"));
-
-        log.info("用户令牌：{} 会话：{}", token, session);
-        //this.jwtConfigProperty.verify(token, session);
-        session.expireAfter(jwtConfigProperty.jwtTimeout());
-
-        long bit = 0;
-        // 添加游客角色
-        bit |= Role.TOURIST_BIT;
-        log.info("添加游客角色结果：{}", BigInteger.valueOf(bit).toString(2));
-        // 添加登录角色
-        bit |= Role.AUTHENTICATED_BIT;
-        log.info("添加登录角色结果：{}", BigInteger.valueOf(bit).toString(2));
-
-        String userid = session.getUserid();
-        List<ChlUserVo> chlUserVos = this.chlUserApi.queryByUserid(userid);
-
-        // 添加渠道用户角色表
-        if (CollectionUtils.isNotEmpty(chlUserVos)) {
-            for (ChlUserVo chlUserVo : chlUserVos) {
-                if (Objects.isNull(chlUserVo))
-                    continue;
-                Long roleBit = chlUserVo.getRoleBit();
-                if (Objects.isNull(roleBit))
-                    continue;
-                bit |= roleBit;
-                log.info("添加\t{}\t\t角色结果：{}", roleBit, BigInteger.valueOf(bit).toString(2));
-            }
-        }
-
-        // 判定证件用户角色
-        List<IdCardUserVo> idCardUserVos = this.idCardUserApi.queryByUserid(userid);
-        if (CollectionUtils.isNotEmpty(idCardUserVos)) {
-            bit |= Role.ID_CARD_USER_BIT;
-            log.info("添加证件角色结果：{}", BigInteger.valueOf(bit).toString(2));
-        }
-        session.setRoleBit(bit);
-        /*
-        MamsSession mamsSession = this.sessionRepository.setCache(session);
-        log.info("令牌续期：{} 会话：{}", token, mamsSession);
-        */
         // 发送令牌续期事件
         MamsSessionContinue mamsSessionContinue = new MamsSessionContinue().setSession(session);
         EventBus.push(mamsSessionContinue);
-        log.info("发送用户会话保持事件：{}",mamsSessionContinue);
         return session;
     }
 
@@ -232,52 +180,15 @@ public class AuthService implements ApplicationRunner, MessageListener {
     // 初始化订阅
     @Override
     public void run(ApplicationArguments args) {
-        startSubscription();
     }
 
 
     @PreDestroy
     public void destroy() {
-        this.subscriptionThread.setDaemon(false);
-        this.subscriptionThread.interrupt();
-    }
-
-
-    public void startSubscription() {
-       /*
-        subscriptionThread = new Thread(() -> {
-            try {
-                subscribeToCacheInvalidation();
-            } catch (Exception e) {
-                log.error("Subscription thread interrupted", e);
-            }
-        }, "redis-subscriber-thread");
-
-        subscriptionThread.setDaemon(true);
-        subscriptionThread.start();
-        log.info("Redis订阅服务已启动");
-        */
-    }
-
-    private void subscribeToCacheInvalidation() {
-        MamsSession execute = stringRedisTemplate.execute((RedisCallback<MamsSession>) connection -> {
-            AtomicReference<String> token = new AtomicReference<>();
-            connection.subscribe((message, pattern) -> {
-                String channel = new String(message.getChannel());
-                log.info("Redis 事件：{} 进入...", channel);
-                if (!StringUtils.equals(channel, Headers.CURRENT_SESSION))
-                    return;
-
-                byte[] body = message.getBody();
-                String tokenStr = new String(body, StandardCharsets.UTF_8);
-                log.info("会话令牌：{} 续期...", tokenStr);
-                token.set(tokenStr);
-            });
-            String s = token.get();
-            return StringUtils.isNotBlank(s) ? auth(s) : null;
-        });
-        if (Objects.nonNull(execute))
-            log.info("监听器续期：{}", execute);
+        try {
+            this.redisMessageListenerContainer.destroy();
+        } catch (Exception ignored) {
+        }
     }
 
     /**
@@ -303,7 +214,8 @@ public class AuthService implements ApplicationRunner, MessageListener {
     }
 
     @Override
-    public void onMessage(Message message, byte[] channel) {
+    public void onMessage(@SuppressWarnings("NullableProblems") Message message,
+                          byte[] channel) {
         if (ArrayUtils.isEmpty(channel))
             return;
         //noinspection ConstantValue
@@ -318,7 +230,13 @@ public class AuthService implements ApplicationRunner, MessageListener {
 
         byte[] body = message.getBody();
         String token = new String(body, StandardCharsets.UTF_8);
-        log.info("Gateway Token {} Got...", token);
+        if (log.isDebugEnabled())
+            log.info("Receive Gateway Token {} continue...", token);
         auth(token);
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        this.redisMessageListenerContainer.addMessageListener(this, new ChannelTopic(Headers.CURRENT_SESSION));
     }
 }

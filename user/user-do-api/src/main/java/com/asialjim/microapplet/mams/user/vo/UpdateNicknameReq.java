@@ -35,6 +35,6 @@ public class UpdateNicknameReq implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 4934819406030276217L;
-    @Sensitive(value = SensitiveType.Customer,match = false)
+    @Sensitive(value = SensitiveType.Customer, match = false, regex = "^[\\p{L}\\p{N}\"' ]*$")
     private String nickname;
 }
